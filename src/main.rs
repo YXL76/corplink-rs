@@ -13,7 +13,6 @@ mod wg;
 #[cfg(windows)]
 use is_elevated;
 
-#[cfg(target_os = "macos")]
 use dns::DNSManager;
 
 use env_logger;
@@ -71,7 +70,6 @@ async fn main() {
     let mut conf = Config::from_file(&conf_file).await;
     let name = conf.interface_name.clone().unwrap();
 
-    #[cfg(target_os = "macos")]
     let use_vpn_dns = conf.use_vpn_dns.unwrap_or(false);
 
     match conf.server {
@@ -143,10 +141,8 @@ async fn main() {
         }
     }
 
-    #[cfg(target_os = "macos")]
     let mut dns_manager = DNSManager::new();
 
-    #[cfg(target_os = "macos")]
     if use_vpn_dns {
         match dns_manager.set_dns(vec![&wg_conf.dns], vec![]) {
             Ok(_) => {}
@@ -192,7 +188,6 @@ async fn main() {
 
     wg::stop_wg_go();
 
-    #[cfg(target_os = "macos")]
     if use_vpn_dns {
         match dns_manager.restore_dns() {
             Ok(_) => {}
