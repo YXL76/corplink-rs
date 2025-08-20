@@ -100,6 +100,7 @@ async fn main() {
     let mut c = Client::new(conf).unwrap();
     let mut logout_retry = true;
     let wg_conf: Option<WgConf>;
+    let timeout;
 
     loop {
         if c.need_login() {
@@ -109,8 +110,9 @@ async fn main() {
         }
         log::info!("try to connect");
         match c.connect_vpn().await {
-            Ok(conf) => {
+            Ok((conf, t)) => {
                 wg_conf = Some(conf);
+                timeout = t;
                 break;
             }
             Err(e) => {
@@ -133,7 +135,7 @@ async fn main() {
         exit(EPERM);
     }
     let mut uapi = wg::UAPIClient { name: name.clone() };
-    match uapi.config_wg(&wg_conf).await {
+    match uapi.config_wg(&wg_conf, timeout).await {
         Ok(_) => {}
         Err(err) => {
             log::error!("failed to config interface with uapi for {}: {}", name, err);
@@ -166,7 +168,7 @@ async fn main() {
         } => {},
 
         // keep alive
-        _ = c.keep_alive_vpn(&wg_conf, 60) => {
+        _ = c.keep_alive_vpn(&wg_conf, timeout as u64) => {
             exit_code = ETIMEDOUT;
         },
 

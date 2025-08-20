@@ -58,7 +58,7 @@ pub struct UAPIClient {
 }
 
 impl UAPIClient {
-    pub async fn config_wg(&mut self, conf: &config::WgConf) -> io::Result<()> {
+    pub async fn config_wg(&mut self, conf: &config::WgConf, timeout: i32) -> io::Result<()> {
         let mut buff = String::from("set=1\n");
         // standard wg-go uapi operations
         // see https://www.wireguard.com/xplatform/#configuration-protocol
@@ -69,7 +69,7 @@ impl UAPIClient {
         buff.push_str(format!("public_key={public_key}\n").as_str());
         buff.push_str("replace_allowed_ips=true\n".to_string().as_str());
         buff.push_str(format!("endpoint={}\n", conf.peer_address).as_str());
-        buff.push_str("persistent_keepalive_interval=10\n".to_string().as_str());
+        buff.push_str(format!("persistent_keepalive_interval={timeout}\n").as_str());
         for route in &conf.route {
             if route.contains("/") {
                 buff.push_str(format!("allowed_ip={route}\n").as_str());

@@ -28,7 +28,7 @@ use crate::totp::{totp_offset, TIME_STEP};
 use crate::utils;
 
 const COOKIE_FILE_SUFFIX: &str = "cookies.json";
-const USER_AGENT: &str = "CorpLink/201000 (GooglePixel; Android 10; en)";
+const USER_AGENT: &str = "Android/2.2.19(CorpLink/2.2.19 (Huawei Duo 2; Android 15; en))";
 
 #[derive(Debug)]
 pub enum Error {
@@ -685,7 +685,7 @@ impl Client {
         }
     }
 
-    pub async fn connect_vpn(&mut self) -> Result<WgConf, Error> {
+    pub async fn connect_vpn(&mut self) -> Result<(WgConf, i32), Error> {
         let vpn_info = self.list_vpn().await?;
 
         log::info!(
@@ -743,7 +743,7 @@ impl Client {
             None => return Err(Error::Error("no vpn available".to_string())),
         };
         let vpn_addr = format!("{}:{}", vpn.ip, vpn.vpn_port);
-        log::info!("try connect to {}, address {}", vpn.name, vpn_addr);
+        log::info!("try connect to {vpn:?}");
 
         let key = self.conf.public_key.clone().unwrap();
         log::info!("try to get wg conf from remote");
@@ -777,7 +777,7 @@ impl Client {
                 _ => 0,
             },
         };
-        Ok(wg_conf)
+        Ok((wg_conf, vpn.timeout))
     }
 
     pub async fn keep_alive_vpn(&mut self, conf: &WgConf, interval: u64) {
