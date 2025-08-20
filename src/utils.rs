@@ -2,8 +2,8 @@ use std::error::Error;
 use std::io::{self, BufRead};
 
 use base32::Alphabet;
-use base64::Engine;
 use base64::engine::general_purpose::STANDARD as base64;
+use base64::Engine;
 use rand::rngs::OsRng;
 use x25519_dalek::{PublicKey, StaticSecret};
 
@@ -12,7 +12,7 @@ pub async fn read_line() -> String {
 }
 
 pub fn b32_decode(s: &str) -> Vec<u8> {
-    base32::decode(Alphabet::RFC4648 { padding: true }, s).unwrap()
+    base32::decode(Alphabet::Rfc4648 { padding: true }, s).unwrap()
 }
 
 pub fn gen_wg_keypair() -> (String, String) {

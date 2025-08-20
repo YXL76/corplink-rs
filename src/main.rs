@@ -13,7 +13,7 @@ mod wg;
 #[cfg(windows)]
 use is_elevated;
 
-use dns::DNSManager;
+use dns::{DNSManager, DNSManagerTrait};
 
 use env_logger;
 use std::env;
@@ -143,7 +143,7 @@ async fn main() {
         }
     }
 
-    let mut dns_manager = DNSManager::new();
+    let mut dns_manager = DNSManager::new(name);
 
     if use_vpn_dns {
         match dns_manager.set_dns(vec![&wg_conf.dns], vec![]) {
